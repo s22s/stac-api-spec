@@ -24,7 +24,7 @@ components:
           $ref: '#/components/schemas/query'
     query:
       type: object
-      description: Define which properties to query and the operatations to apply
+      description: Define which properties to query and the operations to apply
       additionalProperties:
         $ref: '#/components/schemas/queryProp'
       example:

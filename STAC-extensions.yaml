@@ -24,14 +24,6 @@ tags:
     description: >-
       Extension to OGC API - Features to support STAC metadata model and search
       API
-  - name: Transaction Extension
-    description: >-
-      STAC-specific operations to add, remove, and edit items within OGC API -
-      Features collections.
-  - name: Version Extension
-    description: >-
-      This version API extension defines the API resources and semantics for
-      creating and accessing versioned records.
 paths:
   /:
     get:
@@ -130,55 +122,6 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    post:
-      summary: add a new STAC Item to a collection
-      description: create a new STAC Item in a specific collection
-      operationId: postFeature
-      tags:
-        - Transaction Extension
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              oneOf:
-                - $ref: '#/components/schemas/item'
-                - $ref: '#/components/schemas/itemCollection'
-      responses:
-        '201':
-          description: Status of the create request.
-          headers:
-            Location:
-              description: >-
-                The URL of the newly added resource (i.e. path of the resource
-                end point)
-              schema:
-                type: string
-                format: url
-            ETag:
-              schema:
-                type: string
-              description: A string to ensure the item has not been modified
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/item'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        default:
-          description: An error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/exception'
-            text/html:
-              schema:
-                type: string
   '/collections/{collectionId}/items/{featureId}':
     get:
       tags:
@@ -205,128 +148,10 @@ paths:
             text/html:
               schema:
                 type: string
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: A string to ensure the item has not been modified
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
-    put:
-      summary: update an existing feature by Id with a complete item definition
-      description: >-
-        Use this method to update an existing feature. Requires the entire
-        GeoJSON  description be submitted.
-      operationId: updateFeature
-      tags:
-        - Transaction Extension
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-        - $ref: '#/components/parameters/IfMatch'
-      requestBody:
-        description: >-
-          The request body shall contain a representation of the replacement
-          item.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/item'
-      responses:
-        '204':
-          description: The item was replaced
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: An updated string to track changes
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '412':
-          $ref: '#/components/responses/PreconditionFailed'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        default:
-          description: An error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/exception'
-            text/html:
-              schema:
-                type: string
-    patch:
-      summary: update an existing feature by Id with a partial item definition
-      description: >-
-        Use this method to update an existing feature. Requires a GeoJSON
-        fragment (containing the fields to be updated) be submitted.
-      operationId: patchFeature
-      tags:
-        - Transaction Extension
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-        - $ref: '#/components/parameters/IfMatchOptional'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/partialItem'
-      responses:
-        '204':
-          description: Status of the update request.
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: A string to ensure the item has not been modified
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        default:
-          description: An error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/exception'
-            text/html:
-              schema:
-                type: string
-    delete:
-      summary: delete an existing feature by Id
-      description: Use this method to delete an existing feature.
-      operationId: deleteFeature
-      tags:
-        - Transaction Extension
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-        - $ref: '#/components/parameters/IfMatch'
-      responses:
-        '204':
-          description: The resource was deleted.
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        default:
-          description: An error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/exception'
-            text/html:
-              schema:
-                type: string
   /search:
     get:
       summary: Search STAC items with simple filtering.
@@ -350,7 +175,6 @@ paths:
         - $ref: '#/components/parameters/limit'
         - $ref: '#/components/parameters/ids'
         - $ref: '#/components/parameters/collectionsArray'
-        - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/sortby'
         - $ref: '#/components/parameters/fields'
       responses:
@@ -409,70 +233,6 @@ paths:
             text/html:
               schema:
                 type: string
-  '/collections/{collectionId}/versions':
-    get:
-      summary: returns a list of links for a versioned collection
-      description: returns a list of links for a versioned collection
-      tags:
-        - Version Extension
-      operationId: getCollectionVersions
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-      responses:
-        '200':
-          description: >-
-            A catalog JSON definition the returns list of links of a collection
-            versions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/catalogDefinition'
-  '/collections/{collectionId}/versions/{versionId}':
-    get:
-      summary: returns the requested version of a collection
-      description: returns the requested version of a collection
-      tags:
-        - Version Extension
-      operationId: getCollectionVersion
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/versionId'
-      responses:
-        '200':
-          $ref: '#/components/responses/Collections'
-  '/collections/{collectionId}/items/{featureId}/versions':
-    get:
-      summary: returns a list of links for a versioned item
-      description: returns a list of links for a versioned item
-      tags:
-        - Version Extension
-      operationId: getItemVersions
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-      responses:
-        '200':
-          description: >-
-            A catalog JSON definition the returns list of links of an item
-            versions
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/catalogDefinition'
-  '/collections/{collectionId}/items/{featureId}/versions/{versionId}':
-    get:
-      summary: returns the requested version of an item
-      description: returns the requested version of an item
-      tags:
-        - Version Extension
-      operationId: getItemVersion
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-        - $ref: '#/components/parameters/versionId'
-      responses:
-        '200':
-          $ref: '#/components/responses/Collections'
 components:
   parameters:
     bbox:
@@ -642,15 +402,6 @@ components:
       schema:
         $ref: '#/components/schemas/collectionsArray'
       explode: false
-    query:
-      name: query
-      in: query
-      description: >-
-        query for properties in items. Use the JSON form of the queryFilter used
-        in POST.
-      required: false
-      schema:
-        type: string
     sortby:
       name: sortby
       in: query
@@ -673,27 +424,6 @@ components:
         example: 'id,type,-geometry,bbox,properties,-links,-assets'
       style: form
       explode: false
-    IfMatch:
-      name: If-Match
-      in: header
-      description: Only take the action if the ETag of the item still matches
-      required: true
-      schema:
-        type: string
-    IfMatchOptional:
-      name: If-Match
-      in: header
-      description: Only take the action if the ETag of the item still matches
-      required: false
-      schema:
-        type: string
-    versionId:
-      name: versionId
-      in: path
-      description: local identifier of a version
-      required: true
-      schema:
-        type: string
   schemas:
     collection:
       type: object
@@ -1498,7 +1228,6 @@ components:
         - $ref: '#/components/schemas/collectionsFilter'
         - $ref: '#/components/schemas/idsFilter'
         - $ref: '#/components/schemas/limitFilter'
-        - $ref: '#/components/schemas/queryFilter'
         - $ref: '#/components/schemas/sortFilter'
         - $ref: '#/components/schemas/fieldsFilter'
     limit:
@@ -1864,120 +1593,6 @@ components:
         - rel: next
           href: >-
             http://api.cool-sat.com/search?next=ANsXtp9mrqN0yrKWhf-y2PUpHRLQb1GT-mtxNcXou8TwkXhi1Jbk
-    queryFilter:
-      type: object
-      description: Allows users to query properties for specific values
-      properties:
-        query:
-          $ref: '#/components/schemas/query'
-    query:
-      type: object
-      description: Define which properties to query and the operatations to apply
-      additionalProperties:
-        $ref: '#/components/schemas/queryProp'
-      example:
-        'eo:cloud_cover':
-          gt: 8
-          lt: 50
-        platform:
-          eq: landsat-8
-        datetime:
-          gte: '2018-02-12T00:00:00Z'
-          lte: '2018-03-18T12:31:12Z'
-        'pl:item_type':
-          startsWith: PSScene
-        product:
-          in:
-            - foo
-            - bar
-            - baz
-        'eo:gsd':
-          in:
-            - 10
-            - 20
-    queryProp:
-      description: Apply query operations to a specific property
-      anyOf:
-        - description: >-
-            if the object doesn't contain any of the operators, it is equivalent
-            to using the equals operator
-        - type: object
-          description: Match using an operator
-          properties:
-            eq:
-              description: >-
-                Find items with a property that is equal to the specified value.
-                For strings, a case-insensitive comparison must be performed.
-              nullable: true
-              oneOf:
-                - type: string
-                - type: number
-                - type: boolean
-            neq:
-              description: >-
-                Find items that *don't* contain the specified value. For
-                strings, a case-insensitive comparison must be performed.
-              nullable: true
-              oneOf:
-                - type: string
-                - type: number
-                - type: boolean
-            gt:
-              description: >-
-                Find items with a property value greater than the specified
-                value.
-              oneOf:
-                - type: string
-                  format: date-time
-                - type: number
-            lt:
-              description: Find items with a property value less than the specified value.
-              oneOf:
-                - type: string
-                  format: date-time
-                - type: number
-            gte:
-              description: >-
-                Find items with a property value greater than or equal the
-                specified value.
-              oneOf:
-                - type: string
-                  format: date-time
-                - type: number
-            lte:
-              description: >-
-                Find items with a property value less than or equal the
-                specified value.
-              oneOf:
-                - type: string
-                  format: date-time
-                - type: number
-            startsWith:
-              description: >-
-                Find items with a property that begins with the specified
-                string. A case-insensitive comparison must be performed.
-              type: string
-            endsWith:
-              description: >-
-                Find items with a property that ends with the specified string.
-                A case-insensitive comparison must be performed.
-              type: string
-            contains:
-              description: >-
-                Find items with a property that contains the specified literal
-                string, e.g., matches ".*<STRING>.*". A case-insensitive
-                comparison must be performed.
-              type: string
-            in:
-              description: >-
-                Find items with a property that equals at least one entry in the
-                specified array. A case-insensitive comparison must be
-                performed.
-              type: array
-              items:
-                oneOf:
-                  - type: string
-                  - type: number
     sortFilter:
       type: object
       description: Sort the results
@@ -2038,73 +1653,6 @@ components:
         exclude:
           - geometry
           - properties.datetime
-    partialItem:
-      type: object
-      properties:
-        stac_version:
-          $ref: '#/components/schemas/stac_version'
-        stac_extensions:
-          $ref: '#/components/schemas/stac_extensions'
-        id:
-          $ref: '#/components/schemas/itemId'
-        bbox:
-          $ref: '#/components/schemas/bbox'
-        geometry:
-          $ref: '#/components/schemas/geometryGeoJSON'
-        type:
-          $ref: '#/components/schemas/itemType'
-        properties:
-          $ref: '#/components/schemas/partialItemProperties'
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/link'
-        assets:
-          $ref: '#/components/schemas/itemAssets'
-      example:
-        assets:
-          analytic:
-            title: 1-Band Analytic
-            href: >-
-              http://cool-sat.com/catalog/collections/cs/items/CS3-201605XX_132130_04/analytic-1.tif
-    partialItemProperties:
-      type: object
-      description: allows for partial collections of metadata fields
-      additionalProperties: true
-      properties:
-        datetime:
-          $ref: '#/components/schemas/datetime'
-    catalogDefinition:
-      type: object
-      required:
-        - stac_version
-        - id
-        - description
-        - links
-      properties:
-        stac_version:
-          $ref: '#/components/schemas/stac_version'
-        stac_extensions:
-          $ref: '#/components/schemas/stac_extensions'
-        id:
-          description: 'identifier of the catalog used, for example, in URIs'
-          type: string
-        title:
-          description: human readable title of the catalog
-          type: string
-        description:
-          description: >-
-            Detailed multi-line description to fully explain the catalog or
-            collection.
-
-
-            [CommonMark 0.29](http://commonmark.org/) syntax MAY be used for
-            rich text representation.
-          type: string
-        links:
-          type: array
-          items:
-            $ref: '#/components/schemas/link'
   responses:
     LandingPage:
       description: |-
@@ -2312,11 +1860,7 @@ components:
           schema:
             type: string
     NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/exception'
+      description: The requested URI was not found.
     ServerError:
       description: A server error occurred.
       content:
@@ -2326,26 +1870,6 @@ components:
         text/html:
           schema:
             type: string
-    BadRequest:
-      description: The request was malformed or semantically invalid
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/exception'
-    PreconditionFailed:
-      description: Some condition specified by the request could not be met in the server
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/exception'
-    InternalServerError:
-      description: >-
-        The request was syntactically and semantically valid, but an error
-        occurred while trying to act upon it
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/exception'
 servers:
   - url: 'http://dev.cool-sat.com'
     description: Development server
