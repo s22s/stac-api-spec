@@ -7,3 +7,6 @@ info:
   contact:
     name: Astraea, Inc.
     url: 'https://astraea.earth'
+  x-logo:
+    url: 'https://astraea.earth/assets/astraea-logo.svg'
+    altText: 'Astraea logo'
