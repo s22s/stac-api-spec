@@ -1,0 +1,8 @@
+!!files_merge_append [
+    "STAC.yaml",
+    "eod.fragment.yaml",
+    "extensions/sort/sort.fragment.yaml",
+    "extensions/fields/fields.fragment.yaml",
+    "extensions/context/context.fragment.yaml",
+    "extensions/eod/eod.fragment.yaml"
+]

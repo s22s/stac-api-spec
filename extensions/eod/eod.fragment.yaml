@@ -1,0 +1,37 @@
+paths:
+  /search:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/query'
+components:
+  parameters:
+    query:
+      name: query
+      in: query
+      description: query for properties in items. Use the JSON form of the queryFilter in POST.
+      required: false
+      schema:
+        type: string
+  schemas:
+    searchBody:
+      allOf:
+        - $ref: '#/components/schemas/queryFilter'
+    queryFilter:
+      type: object
+      description: Allows users to query properties for specific values
+      properties:
+        query:
+          $ref: '#/components/schemas/query'
+    query:
+      type: string
+      description: Define which properties to query and the operations to apply
+      example:
+        'eo:cloud_cover':
+          value: properties.eo:cloud_cover >= 0 && properties.eo:cloud_cover < 10
+          summary: Cloud Cover is between 0 and 10 (exclusive)
+        datetime:
+          value: (properties.datetime >= 2019-01-01T00:00:00Z && properties.datetime < 2019-01-02T00:00:00Z) || (properties.datetime >= 2019-02-01T00:00:00Z && properties.datetime < 2019-02-02T00:00:00Z)
+          summary: Datetime is either on the first day of January or first day of February 2019
+        gsd:
+          value: properties.gsd < 10
+          summary: GSD (resolution) is less than 10 meters

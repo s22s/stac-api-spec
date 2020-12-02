@@ -1,0 +1,9 @@
+openapi: 3.0.1
+info:
+  title: Astraea Earth OnDemand Catalog API
+  description: Astraea Earth OnDemand Catalog API, a SpatioTemporal Asset Catalog (STAC) compliant API used to power Earth OnDemand and EarthAI Notebook
+  license:
+    name: Proprietary
+  contact:
+    name: Astraea, Inc.
+    url: 'https://astraea.earth'
