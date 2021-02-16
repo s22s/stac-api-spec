@@ -4,5 +4,6 @@
     "extensions/sort/sort.fragment.yaml",
     "extensions/fields/fields.fragment.yaml",
     "extensions/context/context.fragment.yaml",
+    "extensions/transaction/transaction.fragment.yaml",
     "extensions/eod/eod.fragment.yaml"
 ]
