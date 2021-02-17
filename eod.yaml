@@ -23,6 +23,10 @@ tags:
     description: >-
       Extension to OGC API - Features to support STAC metadata model and search
       API
+  - name: Transaction Extension
+    description: >-
+      STAC-specific operations to add, remove, and edit items within OGC API -
+      Features collections.
 paths:
   /:
     get:
@@ -121,6 +125,55 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+    post:
+      summary: add a new STAC Item to a collection
+      description: create a new STAC Item in a specific collection
+      operationId: postFeature
+      tags:
+        - Transaction Extension
+      parameters:
+        - $ref: '#/components/parameters/collectionId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/item'
+                - $ref: '#/components/schemas/itemCollection'
+      responses:
+        '201':
+          description: Status of the create request.
+          headers:
+            Location:
+              description: >-
+                The URL of the newly added resource (i.e. path of the resource
+                end point)
+              schema:
+                type: string
+                format: url
+            ETag:
+              schema:
+                type: string
+              description: A string to ensure the item has not been modified
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/item'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
   '/collections/{collectionId}/items/{featureId}':
     get:
       tags:
@@ -147,10 +200,88 @@ paths:
             text/html:
               schema:
                 type: string
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: A string to ensure the item has not been modified
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/ServerError'
+    put:
+      summary: update an existing feature by Id with a complete item definition
+      description: >-
+        Use this method to update an existing feature. Requires the entire
+        GeoJSON  description be submitted.
+      operationId: updateFeature
+      tags:
+        - Transaction Extension
+      parameters:
+        - $ref: '#/components/parameters/collectionId'
+        - $ref: '#/components/parameters/featureId'
+        - $ref: '#/components/parameters/IfMatch'
+      requestBody:
+        description: >-
+          The request body shall contain a representation of the replacement
+          item.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/item'
+      responses:
+        '204':
+          description: The item was replaced
+          headers:
+            ETag:
+              schema:
+                type: string
+              description: An updated string to track changes
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '412':
+          $ref: '#/components/responses/PreconditionFailed'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
+    delete:
+      summary: delete an existing feature by Id
+      description: Use this method to delete an existing feature.
+      operationId: deleteFeature
+      tags:
+        - Transaction Extension
+      parameters:
+        - $ref: '#/components/parameters/collectionId'
+        - $ref: '#/components/parameters/featureId'
+        - $ref: '#/components/parameters/IfMatch'
+      responses:
+        '204':
+          description: The resource was deleted.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/ServerError'
+        default:
+          description: An error occurred.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/exception'
+            text/html:
+              schema:
+                type: string
   /search:
     get:
       summary: Search STAC items with simple filtering.
@@ -424,6 +555,20 @@ components:
         example: 'id,type,-geometry,bbox,properties,-links,-assets'
       style: form
       explode: false
+    IfMatch:
+      name: If-Match
+      in: header
+      description: Only take the action if the ETag of the item still matches
+      required: true
+      schema:
+        type: string
+    IfMatchOptional:
+      name: If-Match
+      in: header
+      description: Only take the action if the ETag of the item still matches
+      required: false
+      schema:
+        type: string
     query:
       name: query
       in: query
@@ -1663,6 +1808,42 @@ components:
         exclude:
           - geometry
           - properties.datetime
+    partialItem:
+      type: object
+      properties:
+        stac_version:
+          $ref: '#/components/schemas/stac_version'
+        stac_extensions:
+          $ref: '#/components/schemas/stac_extensions'
+        id:
+          $ref: '#/components/schemas/itemId'
+        bbox:
+          $ref: '#/components/schemas/bbox'
+        geometry:
+          $ref: '#/components/schemas/geometryGeoJSON'
+        type:
+          $ref: '#/components/schemas/itemType'
+        properties:
+          $ref: '#/components/schemas/partialItemProperties'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/link'
+        assets:
+          $ref: '#/components/schemas/itemAssets'
+      example:
+        assets:
+          analytic:
+            title: 1-Band Analytic
+            href: >-
+              http://cool-sat.com/catalog/collections/cs/items/CS3-201605XX_132130_04/analytic-1.tif
+    partialItemProperties:
+      type: object
+      description: allows for partial collections of metadata fields
+      additionalProperties: true
+      properties:
+        datetime:
+          $ref: '#/components/schemas/datetime'
     queryFilter:
       type: object
       description: Allows users to query properties for specific values
@@ -1894,7 +2075,11 @@ components:
           schema:
             type: string
     NotFound:
-      description: The requested URI was not found.
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
     ServerError:
       description: A server error occurred.
       content:
@@ -1904,6 +2089,26 @@ components:
         text/html:
           schema:
             type: string
+    BadRequest:
+      description: The request was malformed or semantically invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
+    PreconditionFailed:
+      description: Some condition specified by the request could not be met in the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
+    InternalServerError:
+      description: >-
+        The request was syntactically and semantically valid, but an error
+        occurred while trying to act upon it
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/exception'
 servers:
   - url: 'http://dev.cool-sat.com'
     description: Development server

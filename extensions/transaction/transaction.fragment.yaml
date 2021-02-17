@@ -100,46 +100,46 @@ paths:
             text/html:
               schema:
                 type: string
-    patch:
-      summary: update an existing feature by Id with a partial item definition
-      description: >-
-        Use this method to update an existing feature. Requires a GeoJSON
-        fragment (containing the fields to be updated) be submitted.
-      operationId: patchFeature
-      tags:
-        - Transaction Extension
-      parameters:
-        - $ref: '#/components/parameters/collectionId'
-        - $ref: '#/components/parameters/featureId'
-        - $ref: '#/components/parameters/IfMatchOptional'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/partialItem'
-      responses:
-        '204':
-          description: Status of the update request.
-          headers:
-            ETag:
-              schema:
-                type: string
-              description: A string to ensure the item has not been modified
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/ServerError'
-        default:
-          description: An error occurred.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/exception'
-            text/html:
-              schema:
-                type: string
+#    patch:
+#      summary: update an existing feature by Id with a partial item definition
+#      description: >-
+#        Use this method to update an existing feature. Requires a GeoJSON
+#        fragment (containing the fields to be updated) be submitted.
+#      operationId: patchFeature
+#      tags:
+#        - Transaction Extension
+#      parameters:
+#        - $ref: '#/components/parameters/collectionId'
+#        - $ref: '#/components/parameters/featureId'
+#        - $ref: '#/components/parameters/IfMatchOptional'
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/partialItem'
+#      responses:
+#        '204':
+#          description: Status of the update request.
+#          headers:
+#            ETag:
+#              schema:
+#                type: string
+#              description: A string to ensure the item has not been modified
+#        '400':
+#          $ref: '#/components/responses/BadRequest'
+#        '404':
+#          $ref: '#/components/responses/NotFound'
+#        '500':
+#          $ref: '#/components/responses/ServerError'
+#        default:
+#          description: An error occurred.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/exception'
+#            text/html:
+#              schema:
+#                type: string
     delete:
       summary: delete an existing feature by Id
       description: Use this method to delete an existing feature.
